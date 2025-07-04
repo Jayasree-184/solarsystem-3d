@@ -1,0 +1,261 @@
+<!--
+==========================================================
+[ Nijat Aliyev | Full Stack Developer ]
+Name    :  Nijat Aliyev
+Email   :  developer.nijat@gmail.com
+Website :  aliyev.dev
+==========================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=7">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="keywords" content="solar system, planets, html, javascript, canvas, html canvas, draw canvas,nijat aliyev, developer nijat">
+    <meta name="description" content="Realistic Animated Solar System with HTML Canvas and JavaScript. Author: Nijat Aliyev">
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: black; /* Set the background color to dark */
+      }
+
+      canvas {
+        display: block;
+      }
+    </style>
+    <title>Realistic Animated Solar System with HTML Canvas | Nijat Aliyev</title>
+  </head>
+  <body>
+    <canvas id="solarSystemCanvas"></canvas>
+
+    <script>
+      const canvas = document.getElementById("solarSystemCanvas");
+      const ctx = canvas.getContext("2d");
+      const planets = [
+        {
+          name: "Sun",
+          radius: 50,
+          color: "yellow",
+          orbitRadius: 0.001,
+          orbitSpeed: 0.01, // Adjust to a small value
+          speed: 0, // Speed in km/s,
+          imageSrc: "/images/webp/Sun.webp",
+        },
+        {
+          name: "Mercury",
+          radius: 8,
+          color: "#b3b3b3",
+          orbitRadius: 100,
+          orbitSpeed: 0.03,
+          speed: 47.87, // Speed in km/s,
+          imageSrc: "/images/webp/Mercury.webp",
+        },
+        {
+          name: "Venus",
+          radius: 11,
+          color: "#e68a00",
+          orbitRadius: 160,
+          orbitSpeed: 0.02,
+          speed: 35.02, // Speed in km/s,
+          imageSrc: "/images/webp/Venus.webp",
+        },
+        {
+          name: "Earth",
+          radius: 14,
+          color: "#3399ff",
+          orbitRadius: 220,
+          orbitSpeed: 0.015,
+          speed: 29.78, // Speed in km/s,
+          imageSrc: "/images/webp/Earth.webp",
+        },
+        {
+          name: "Mars",
+          radius: 10,
+          color: "#ff3300",
+          orbitRadius: 300,
+          orbitSpeed: 0.01,
+          speed: 24.07, // Speed in km/s,
+          imageSrc: "/images/webp/Mars.webp",
+        },
+        {
+          name: "Jupiter",
+          radius: 32,
+          color: "#f7d586",
+          orbitRadius: 400,
+          orbitSpeed: 0.005,
+          speed: 13.06, // Speed in km/s,
+          imageSrc: "/images/webp/Jupiter.webp",
+        },
+        {
+          name: "Saturn",
+          radius: 27,
+          color: "#adaaa3",
+          orbitRadius: 500,
+          orbitSpeed: 0.004,
+          speed: 9.68, // Speed in km/s,
+          imageSrc: "/images/webp/Saturn.webp",
+        },
+        {
+          name: "Uranus",
+          radius: 17,
+          color: "#66ccff",
+          orbitRadius: 600,
+          orbitSpeed: 0.003,
+          speed: 6.8, // Speed in km/s,
+          imageSrc: "/images/webp/Uranus.webp",
+        },
+        {
+          name: "Neptune",
+          radius: 16,
+          color: "#3366ff",
+          orbitRadius: 700,
+          orbitSpeed: 0.002,
+          speed: 5.43, // Speed in km/s,
+          imageSrc: "/images/webp/Neptune.webp",
+        },
+        // Add more planets as needed
+      ];
+
+      const stars = [];
+      const asteroids = [];
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      function drawPlanet(planet) {
+        ctx.beginPath();
+        ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
+        ctx.fillStyle = planet.color;
+        ctx.fill();
+        ctx.closePath();
+        ctx.font = "11px Arial";
+        ctx.fillStyle = "white";
+        ctx.fillText(
+          planet.name,
+          planet.x - planet.radius,
+          planet.y + planet.radius + 25
+        );
+      }
+
+      function drawPlanetWithImg(planet) {
+        const planetImage = new Image();
+        planetImage.src = planet.imageSrc;
+
+        const x =
+          canvas.width / 2 + planet.orbitRadius * Math.cos(planet.orbitSpeed);
+        const y =
+          canvas.height / 2 + planet.orbitRadius * Math.sin(planet.orbitSpeed);
+
+        planet.orbitSpeed += 0.1 * (1 / planet.orbitRadius); // Adjust speed for a more realistic feel
+
+        ctx.drawImage(
+          planetImage,
+          x - planet.radius,
+          y - planet.radius,
+          planet.radius * 2,
+          planet.radius * 2
+        );
+      }
+
+      function drawTrajectory(planet) {
+        ctx.beginPath();
+        ctx.arc(
+          canvas.width / 2,
+          canvas.height / 2,
+          planet.orbitRadius,
+          0,
+          Math.PI * 2
+        );
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.stroke();
+        ctx.closePath();
+      }
+
+      function drawStar(star) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fillRect(star.x, star.y, star.size, star.size);
+      }
+
+      function generateStars() {
+        for (let i = 0; i < 20; i++) {
+          const x = Math.random() * canvas.width;
+          const y = Math.random() * canvas.height;
+          const size = Math.random() * 4;
+
+          stars.push({ x, y, size });
+        }
+      }
+
+      function generateAsteroids() {
+        for (let i = 0; i < 2; i++) {
+          const x = Math.random() * canvas.width;
+          const y = Math.random() * canvas.height;
+          const size = Math.random() * 4;
+          const speed = 1 + Math.random() * 2;
+          const angle = Math.random() * Math.PI * 2; // Random angle
+
+          asteroids.push({ x, y, size, speed, angle });
+        }
+      }
+
+      function drawAsteroid(asteroid) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+        ctx.fillRect(asteroid.x, asteroid.y, asteroid.size, asteroid.size);
+      }
+
+      function moveAsteroids() {
+        asteroids.forEach((asteroid) => {
+          asteroid.x += asteroid.speed * Math.cos(asteroid.angle);
+          asteroid.y += asteroid.speed * Math.sin(asteroid.angle);
+
+          if (
+            asteroid.x < 0 ||
+            asteroid.x > canvas.width ||
+            asteroid.y < 0 ||
+            asteroid.y > canvas.height
+          ) {
+            // Reset position if asteroid goes out of bounds
+            asteroid.x = Math.random() * canvas.width;
+            asteroid.y = Math.random() * canvas.height;
+          }
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw stars
+        stars.forEach(drawStar);
+
+        // Draw asteroids
+        asteroids.forEach(drawAsteroid);
+
+        planets.forEach((planet) => {
+          drawTrajectory(planet);
+
+          planet.x =
+            canvas.width / 2 + planet.orbitRadius * Math.cos(planet.orbitSpeed);
+          planet.y =
+            canvas.height / 2 +
+            planet.orbitRadius * Math.sin(planet.orbitSpeed);
+
+          planet.orbitSpeed += 0.1 * (1 / planet.orbitRadius); // Adjust speed for a more realistic feel
+
+          drawPlanetWithImg(planet);
+        });
+
+        // Move asteroids
+        moveAsteroids();
+
+        requestAnimationFrame(animate);
+      }
+
+      generateStars();
+      generateAsteroids();
+      animate();
+    </script>
+  </body>
+</html>
